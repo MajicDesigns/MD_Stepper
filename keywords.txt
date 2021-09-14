@@ -1,0 +1,37 @@
+#######################################
+# Syntax Coloring Map
+#######################################
+
+#######################################
+# Classes and datatypes (KEYWORD1)
+#######################################
+MD_Stepper	KEYWORD1
+stepMode_t	KEYWORD1
+
+#######################################
+# Methods and functions (KEYWORD2)
+#######################################
+begin	KEYWORD2
+start	KEYWORD2
+stop	KEYWORD2
+run	KEYWORD2
+getDirection	KEYWORD2
+setDirection	KEYWORD2
+resetPosition	KEYWORD2
+getPosition	KEYWORD2
+getMaxSpeed	KEYWORD2
+setMaxSpeed	KEYWORD2
+getSpeed	KEYWORD2
+setSpeed	KEYWORD2
+move	KEYWORD2
+moveToGo	KEYWORD2
+moveHome	KEYWORD2
+isBusy	KEYWORD2
+setBusyPin	KEYWORD2
+getStepMode	KEYWORD2
+setStepMode	KEYWORD2
+getMotorLock	KEYWORD2
+enableMotorLock	KEYWORD2
+getMotorLockTime	KEYWORD2
+setMotorLockTime	KEYWORD2
+getRawStatus	KEYWORD2

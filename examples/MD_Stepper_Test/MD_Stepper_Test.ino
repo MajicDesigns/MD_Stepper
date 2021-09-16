@@ -200,6 +200,6 @@ void setup(void)
 
 void loop(void)
 {
-  S.run();
+  if (!S.isAutoRun()) S.run();
   CP.run();
 }

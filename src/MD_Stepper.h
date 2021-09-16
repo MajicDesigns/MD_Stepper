@@ -5,6 +5,14 @@
 This library provide control of unipolar and bipolar stepper motors
 through the appropriate hardware drivers.
 
+Motions can be enabled in a polled mode for generic architectures or 
+from an interrupt timer for AVR architectures, using either AVR 
+timer 1 or 2 (selectable at compile time).
+
+This library was designed for stepper control of motors used in robotic 
+applications, running at modest step frequencies (ie the hundreds of 
+Hz rather than KHz).
+
 Important Notes:
 - This library uses AVR TIMER1 or TIMER2 to implement the interrupt
 driven clock. TIMER0 is used by the Arduino millis() clock, TIMER1
@@ -12,31 +20,20 @@ is commonly used by the Servo library and TIMER2 by the Tone library.
 Change USE_TIMER (defined at the top of the header file) to select
 which timer is enabled in the library code.
 
+- With ENABLE_AUTORUN disabled, this library will function on all 
+hardware architectures but run() needs to be called each iteration 
+through loop().
+
+- With ENABLE_AUTORUN enabled, This library is limited to AVR 
+architectures and run() will be invoked by a timer ISR, effectively 
+driving the motor managment as a background process.
+
 - This library has been tested on Arduino Uno and Nano (ie, 328P processor).
-It should work on other AVR chips (eg, MEGA) with slight modifications but
-it will not work on non-AVR architectures without some extensive rework.
 
-
-# Implementation
-
-This library implements user defined frequency PWM output for any digital pin
-software limited to MAX_FREQUENCY Hz.
-
-The TIMERn is set for 255 times this frequency (eg, 200Hz becomes 51kHz). This
-causes the TIMERn interrupt routine to be called 255 times for each PWM cycle
-and, depending on where it is in the cycle, allows the software to set the
-digital output pin to LOW or HIGH, thus creating the desired PWM signal.
-This is illustrated below.
-
-![PWM Timing Diagram] (PWM_Timing.png "PWM Timing Diagram")
-
-The duty cycle can be changed very smoothly by changing the set point at which
-the digital transition occurs. The new duty cycle takes effect at the next
-PWM digital transition.
-
-TIMERn is a global resource, so each object instance of class is driven from the
-same TIMERn interrupt. The constant MAX_PWM_PIN is used to set limits the
-global maximum for instances allowed to be processed by the interrupt.
+- TIMERn is a global resource, so each concurrent object instance is driven 
+from the same TIMERn interrupt. The constant MAX_INSTANCE is used to set 
+limits the global maximum for instances allowed to be processed by the 
+interrupt.
 
 See Also
 - \subpage pageRevisionHistory
@@ -75,6 +72,11 @@ Sep 2021 ver 1.0.0
  * \file
  * \brief Main header file and class definition for the MD_Stepper library.
  */
+
+#define ENABLE_AUTORUN 1    ///< 1 enables autorun mode using TIMER ISR
+#if ENABLE_AUTORUN
+#define USE_TIMER 2         ///< Set to use hardware TIMER1 or TIMER2 (1 or 2)
+#endif
 
 #ifndef STPDEBUG
 #define STPDEBUG 0      ///< 1 turns library debug output on
@@ -145,7 +147,7 @@ public:
   * If all the instances of the class are closed, then the ISR is
   * disconnected and the timer is stopped.
   */
-  ~MD_Stepper(void) {}
+  ~MD_Stepper(void);
 
   /** @} */
 
@@ -159,11 +161,11 @@ public:
   * Initialize the object data. This needs to be called during setup()
   * to set items that cannot be done during object creation.
   *
-  * If this is the first instance of this class, then the ISR is code
+  * If this is the first instance of this class, then the ISR TIMER code
   * is initialized and the frequency of the hardware timer is set.
   * Subsequent instances do not affect the timer frequency.
   * 
-  * The busy pin can also be specifed as an option parameter.
+  * The busy pin can be specified as an option parameter.
   *
   * \sa setBusyPin()
   *
@@ -187,7 +189,7 @@ public:
   /**
    * Stop movement.
    *
-   * Stop the motor moving imediately. This stops free running motion and will 
+   * Stop the motor moving immediately. This stops free running motion and will 
    * immediately terminate motion set up using move().
    *
    * \sa move(), run(), start()
@@ -197,8 +199,11 @@ public:
   /**
    * Run motion.
    *
-   * This is called every iteration through loop() to run all the required
-   * Stepper management functions.
+   * if autorun is enabled, then this is called automatically every time the 
+   * ISR is triggered.
+   *
+   * If autorun is not enabled, this needs to be called every iteration through 
+   * loop() to run all the required Stepper management functions.
    * 
    * \sa start(), stop()
    * 
@@ -258,7 +263,7 @@ public:
   * Gets the current step counter.
   *
   * The library counts the number of steps it moves (+1 for forward motion, -1
-  * for reverse motion) into a cumulative counter. This method retuns the current
+  * for reverse motion) into a cumulative counter. This method returns the current
   * step count.
   *
   * The number of steps proportional to the current motor running mode (ie, HALF
@@ -334,7 +339,7 @@ public:
   * The motor can be set to move a specific number of steps and then stop. This
   * method sets up the number of steps for the next start(). 
   *
-  * If the number of stps is positive the motion is in the forward direction; 
+  * If the number of steps is positive the motion is in the forward direction; 
   * negative for reverse motion. Any change in direction cause by move() remains 
   * in effect at the end of the motor movement.
   *
@@ -356,7 +361,7 @@ public:
   * The motor can be set to move a specific number of steps and then stop. This
   * method sets up the number of steps for the next start().
   *
-  * If the number of stps is positive the motion is in the forward direction;
+  * If the number of steps is positive the motion is in the forward direction;
   * negative for reverse motion. Any change in direction cause by move() remains
   * in effect at the end of the motor movement.
   *
@@ -401,7 +406,21 @@ public:
   */
   inline bool isBusy(void) { return(flagChk(_status, S_BUSY)); }
 
- /**
+  /**
+   * Check if autorun is enabled.
+   *
+   * Check if autorun is enabled. This required the compile time switch to be 
+   * set and the autorun initialization in begin() to have succeeded. If autorun 
+   * the run() method will be automatically invoked on an interrupt timer and does
+   * not need to be called from loop().
+   *
+   * \sa \ref ENABLE_AUTORUN
+   *
+   * \return true if the autorun is enabled
+   */
+  inline bool isAutoRun(void) { return(flagChk(_status, S_AUTORUN)); }
+  
+  /**
   * Set pin for hardware busy status.
   *
   * If this pin is specified, it will mirror the status returned by isBusy() at the
@@ -459,7 +478,7 @@ public:
  /**
   * Enable the motor lock setting.
   *
-  * When the motor is not being moved, the coils can be left energised 
+  * When the motor is not being moved, the coils can be left energized 
   * for maximum holding torque or turned off to reduce power consumption 
   * and motor heating. This method changes the setting between locked 
   * (true) and unlocked (false).
@@ -494,7 +513,7 @@ public:
  /**
   * Set the motor lock hold time.
   *
-  * When the motor is not being moved, the coils can be left energised
+  * When the motor is not being moved, the coils can be left energized
   * for maximum holding torque or turned off to reduce power consumption
   * and motor heating. If set to unlock, it will remain locked for the
   * period of time specified by this method before the motor coils are
@@ -524,10 +543,11 @@ public:
   inline uint8_t getRawStatus(void) { return(_status); }
 
   /** @} */
-private:
-  enum { IDLE, INIT, RUN, STOP } _runState = INIT;
 
-  static const uint16_t SPEEDMAX_DEFAULT = 1000;// maximum full steps/second
+private:
+  volatile enum { IDLE, INIT, RUN, STOP } _runState = INIT;
+
+  static const uint16_t SPEEDMAX_DEFAULT = 500; // maximum full steps/second
   static const uint8_t MAX_PINS = 4;            // max number of control pins
 
   uint8_t _pinBusy;              // hardware 'busy' pin; 255 if not used
@@ -547,23 +567,65 @@ private:
   int8_t _seqCur = 0;            // current element of step sequence table
 
   // Define options register and bit positions
-  uint8_t _options;              // options register
+  volatile uint8_t _options;              // options register
   const uint8_t O_LOCKED = 0;    // leave motor locked when stopped stopped
 
   // Define status register and bit positions
-  uint8_t _status;               // status flags
+  volatile uint8_t _status;      // status flags
   const uint8_t S_BUSY = 0;      // motor currently rotation (busy)
   const uint8_t S_RUNMOVE = 1;   // running in move mode, otherwise in free run mode
   const uint8_t S_FWD = 2;       // current motion is in forward direction
   const uint8_t S_LOCKED = 3;    // motor currently locked
+  const uint8_t S_AUTORUN = 4;   // autorun initialized and running
 
-  inline bool flagChk(uint8_t f, uint8_t bit) { return((f & _BV(bit)) != 0); }
-  inline void flagSet(uint8_t &f, uint8_t bit) { f |= _BV(bit); }
-  inline void flagClr(uint8_t &f, uint8_t bit) { f &= ~_BV(bit); }
+  inline bool flagChk(volatile uint8_t f, uint8_t bit) { return((f & _BV(bit)) != 0); }
+  inline void flagSet(volatile uint8_t &f, uint8_t bit) { f |= _BV(bit); }
+  inline void flagClr(volatile uint8_t &f, uint8_t bit) { f &= ~_BV(bit); }
 
   void calcStepTick(uint16_t spd);
   bool runFSM(void);
   void singleStep(void);
+
+#if ENABLE_AUTORUN
+private: 
+  static const uint16_t ISR_FREQUENCY = 4096;  ///< frequency for TIMER ISR
+#if USE_TIMER == 1
+  static const uint32_t TIMER_RESOLUTION = 65535;    ///< Timer1 is 16 bit
+#elif USE_TIMER == 2
+  static const uint32_t TIMER_RESOLUTION = 256;      ///< Timer2 is 8 bit
+#endif
+  
+  inline void setTimerMode(void);   // set TIMER mode
+  inline void attachISR(void);      // attach to TIMER ISR
+  inline void detachISR(void);      // detach from TIMER ISR
+  inline void stopTimer(void);      // stop the timer
+  void disableInstance(void);       // enable autorun instance
+  bool enableInstance(void);        // enable autorun instance
+
+public:
+ //--------------------------------------------------------------
+ /** \name AUTORUN and ISR management related. NOT for Applications!
+  * @{
+  */
+  static const uint8_t MAX_INSTANCE = 4;  ///< Maximum concurrent instances
+
+  static bool _bInitialised;          ///< ISR - Global vector initialization flag
+  static volatile uint8_t _instCount; ///< ISR - Number of instances currently configured
+  static MD_Stepper* _cbInstance[];   ///< ISR - Callback instance handle per pin slot
+
+ /**
+  * ISR - Set the timer frequecy for the
+  *
+  * NOT FOR END USER APPLICATIONS!
+  * 
+  * Manipulates the CPU registers to set the appropriate clock counters
+  * to achieve the desired output frequency.
+  * 
+  * \param freq the desired frequency.
+  */ 
+    void setFrequency(uint32_t freq);
+  /** @} */
+#endif
 };
 
 

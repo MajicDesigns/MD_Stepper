@@ -27,6 +27,7 @@ move	KEYWORD2
 moveToGo	KEYWORD2
 moveHome	KEYWORD2
 isBusy	KEYWORD2
+isAutoRun	KEYWORD2
 setBusyPin	KEYWORD2
 getStepMode	KEYWORD2
 setStepMode	KEYWORD2

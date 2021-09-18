@@ -1,6 +1,6 @@
 # Library for Stepper Motors
 
-[![arduino-library-badge](https://www.ardu-badge.com/badge/MD_OnePin.svg?)](https://www.ardu-badge.com/MD_Stepper)
+[![arduino-library-badge](https://www.ardu-badge.com/badge/MD_Stepper.svg?)](https://www.ardu-badge.com/MD_Stepper)
 
 This library provides services to control unipolar and bipolar stepper 
 motors through appropriate intermediate hardware drivers. It is intended

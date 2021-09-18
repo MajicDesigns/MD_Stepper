@@ -2,18 +2,36 @@
 /**
 \mainpage Stepper motor control library
 
-This library provide control of unipolar and bipolar stepper motors
-through the appropriate hardware drivers.
+This library provides services to control unipolar and bipolar stepper 
+motors through appropriate intermediate hardware drivers. It is intended
+for control of motors used in robotic applications running at modest 
+step frequencies (ie up to low KHz rates).
 
-Motions can be enabled in a polled mode for generic architectures or 
+Motion can be enabled in a polled mode for generic architectures or 
 from an interrupt timer for AVR architectures, using either AVR 
 timer 1 or 2 (selectable at compile time).
 
-This library was designed for stepper control of motors used in robotic 
-applications, running at modest step frequencies (ie the hundreds of 
-Hz rather than KHz).
+## Motor Connections
 
-Important Notes:
+The motor control interface is 4 digital output pins specified in the 
+class constructor. These pins are connected to external motor control
+hardware to provide the appropriate H-bridge connections for control
+bipolar motors) or current switching (unipolar motors).
+
+The pins are labeled in pairs A1, A2, B1, B2 for the 2 motor coils
+as shown in the figure below.
+
+![Motor Connection Diagram] (Motor_Connections.png "Motor Connections")
+
+### Specific Tested Motor Configurations
+
+![28BYJ-48] (Motor_28BYJ-48.png "28BYJ-48 Connections")
+
+_28BYJ-48 with ULN2003 driver_ - Unipolar stepper with coil wire pairs
+BLU/YLW, ORN/PNK and common RED. I/O pin wiring INA1 to IND, INA2/INB,
+INB1/INC, INB2/INA.
+
+## Important Notes
 - This library uses AVR TIMER1 or TIMER2 to implement the interrupt
 driven clock. TIMER0 is used by the Arduino millis() clock, TIMER1
 is commonly used by the Servo library and TIMER2 by the Tone library.
@@ -26,7 +44,7 @@ through loop().
 
 - With ENABLE_AUTORUN enabled, This library is limited to AVR 
 architectures and run() will be invoked by a timer ISR, effectively 
-driving the motor managment as a background process.
+driving the motor management as a background process.
 
 - This library has been tested on Arduino Uno and Nano (ie, 328P processor).
 
@@ -62,6 +80,11 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \page pageRevisionHistory Revision History
+Sep 2021 ver 1.0.1
+- Fixed small issues, eliminated maxSpeed concepts
+- Clearer documentation for required connections
+- Added SpeedContol and PositionControl examples
+
 Sep 2021 ver 1.0.0
 - Initial release
 */
@@ -73,7 +96,9 @@ Sep 2021 ver 1.0.0
  * \brief Main header file and class definition for the MD_Stepper library.
  */
 
+#ifndef ENABLE_AUTORUN
 #define ENABLE_AUTORUN 1    ///< 1 enables autorun mode using TIMER ISR
+#endif
 #if ENABLE_AUTORUN
 #define USE_TIMER 2         ///< Set to use hardware TIMER1 or TIMER2 (1 or 2)
 #endif
@@ -129,15 +154,16 @@ public:
   * Instantiate a new instance of the class.
   *
   * The main function for the core object is to set the internal
-  * shared variables and timers to default values.
+  * setup Parameters and other default values.
+  * 
+  * The pins are passed as one pair for coil A and one pair for coil B.
   *
-  * \param inA pin connected to hardware driver INA or IN1 input (Coil A).
-  * \param inB pin connected to hardware driver INB or IN2 input (Coil A).
-  * \param inC pin connected to hardware driver INC or IN3 input (Coil B).
-  * \param inD pin connected to hardware driver IND or IN4 input (Coil B).
-  * \param speedMax the maximum speed the motor can work at in steps/second.
+  * \param inA1 pin connected to hardware driver Coil A one side.
+  * \param inA2 pin connected to hardware driver Coil A other side.
+  * \param inB1 pin connected to hardware driver Coil B one side.
+  * \param inB2 pin connected to hardware driver Coil B other side.
   */
-  MD_Stepper(uint8_t inA, uint8_t inB, uint8_t inC, uint8_t inD, uint16_t speedMax = SPEEDMAX_DEFAULT);
+  MD_Stepper(uint8_t inA1, uint8_t inA2, uint8_t inB1, uint8_t inB2);
 
  /**
   * Class Destructor.
@@ -277,34 +303,6 @@ public:
   inline int32_t getPosition(void)  { return(_stepCount); }
 
  /**
-  * Gets the configured maximum speed.
-  *
-  * \sa setMaxSpeed(), MD_Stepper()
-  *
-  * \return the current configured maximum speed
-  */
-  inline uint16_t getMaxSpeed(void) { return(_speedMax); }
-
- /**
-  * Gets the configured maximum speed.
-  *
-  * Motors can be practically run up to a maximum speed (steps/sec). The library
-  * can be configured with this speed to allow upper-bound checks. This method
-  * sets the maximum speed for the instance of the library. The setting can also 
-  * be set as an optional parameter in the class constructor.
-  *
-  * As the speed is specified in steps/sec, the current motor stepping mode
-  * has an effect. HALF stepping results in half the physical speed of a FULL
-  * or WAVE stepping for the same numeric setting.
-  *
-  * \sa getMaxSpeed(), MD_Stepper()
-  *
-  * \param s the maximum speed in steps/sec
-  */
-  void setMaxSpeed(uint16_t s);
-
-
- /**
   * Gets the configured running speed.
   *
   * \sa setSpeed(), setMaxSpeed()
@@ -316,18 +314,20 @@ public:
  /**
   * Set the running speed.
   *
-  * The motor speed can be set to any value between 0 and the configured maximum
-  * speed. Speeds higher than the maximum are capped at the maximum. Setting the 
-  * motor speed to 0 has the same effect as a stop().
+  * The motor speed can be set to any value but speeds higher than 
+  * the motor maximum attainable speed will result in it stalling. 
+  * Setting the motor speed to 0 has the same effect as a stop().
   * 
   * The new speed takes effect at the next motor step (immediately if running 
   * or at the next start()).
   * 
   * As the speed is specified in steps/sec, the current motor stepping mode 
   * has an effect. HALF stepping results in half the physical speed of a FULL 
-  * or WAVE stepping fore the same numeric setting.
+  * or WAVE stepping for the same numeric setting, so when the mode is changed
+  * all items mesaured in steps or steps per unit time are adjusted 
+  * appropriately.
   *
-  * \sa getSpeed(), setMaxSpeed()
+  * \sa getSpeed(), setMode()
   *
   * \param s the required running speed in steps/sec
   */
@@ -529,7 +529,7 @@ public:
   void setMotorLockTime(uint8_t t) { _timeLockRelease = t * 100; }
 
  /**
-  * Get the internal ststus byte.
+  * Get the internal status byte.
   *
   * The library maintains internal status bit field of status information.
   * This method returns the bit field as a byte, mainly for debugging purposes. 
@@ -547,18 +547,17 @@ public:
 private:
   volatile enum { IDLE, INIT, RUN, STOP } _runState = INIT;
 
-  static const uint16_t SPEEDMAX_DEFAULT = 500; // maximum full steps/second
+  static const uint16_t SPEEDMAX_DEFAULT = 5000; // maximum full steps/second
   static const uint8_t MAX_PINS = 4;            // max number of control pins
 
-  uint8_t _pinBusy;              // hardware 'busy' pin; 255 if not used
   uint8_t _in[MAX_PINS];         // output pins [A..D]
-
-  uint32_t _speedMax;            // maximum speed in full step (full steps/sec)
+  uint8_t _pinBusy;              // hardware 'busy' pin; 255 if not used
+  
   uint32_t _speedSet;            // set speed in full steps (full steps/sec)
-  int32_t  _stepCount;           // current steps since last resetPosition()
+  int32_t  _stepCount;           // current steps and direction since last resetPosition()
   uint32_t _moveCountSet;        // move pulses target value and to-go counter
 
-  uint16_t _stepTick;            // time between each motor step at _speedSet speed, in microseconds
+  uint32_t _stepTick;            // time between each motor step at _speedSet speed, in microseconds
   uint32_t _timeMark;            // generic time marker for FSM. This could be in milli- or micro-seconds in context
 
   uint16_t _timeLockRelease;     // set time in milliseconds before pins are released

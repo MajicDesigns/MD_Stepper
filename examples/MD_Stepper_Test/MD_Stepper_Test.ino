@@ -1,14 +1,26 @@
+/*
+ Example sketch for the MD_Stepper library.
+
+ Tests all the calls for the library by allowing
+ them to be invoked through a command line interface
+ with input and output to the serial monitor.
+
+ Dependencies:
+ MD_cmdProcessor library found at http://github.com/MajicDesigns/MD_cmdProcessor 
+            or the IDE library manager.
+*/
+
 #include <MD_cmdProcessor.h>
 #include <MD_Stepper.h>
 
-const uint8_t INA = 7;
-const uint8_t INB = 6;
-const uint8_t INC = 5;
-const uint8_t IND = 4;
+const uint8_t INA1 = 4;
+const uint8_t INA2 = 5;
+const uint8_t INB1 = 6;
+const uint8_t INB2 = 7;
 
 const uint8_t PIN_BUSY_SIGNAL = 8;
 
-MD_Stepper S(INA, INB, INC, IND);
+MD_Stepper S(INA1, INA2, INB1, INB2);
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
 
@@ -49,15 +61,6 @@ void handlerS(char* param)
   S.setSpeed(s);
   Serial.print(F("\nSpeed: "));
   Serial.print(S.getSpeed());
-}
-
-void handlerSM(char* param)
-{
-  uint16_t s = strtoul(param, nullptr, 0);
-
-  S.setMaxSpeed(s);
-  Serial.print(F("\nMax Speed: "));
-  Serial.print(S.getMaxSpeed());
 }
 
 void handlerM(char* param)
@@ -142,8 +145,6 @@ void handlerG(char* param)
   }
   Serial.print(F("\nSpeed: "));
   Serial.print(S.getSpeed());
-  Serial.print(F("\nMax Speed: "));
-  Serial.print(S.getMaxSpeed());
   Serial.print(F("\nPosition: "));
   Serial.print(S.getPosition());
   Serial.print(F("\nDirection: "));
@@ -163,12 +164,10 @@ const MD_cmdProcessor::cmdItem_t PROGMEM cmdTable[] =
   { "?",  handlerHelp, "",    "Help", 0 },
   { "h",  handlerHelp, "",    "Help", 0 },
 
-  { "s",  handlerS,    "v",   "Speed set to v full pulse/sec", 1 },
-  { "sm", handlerSM,   "v",   "Speed Max set to v full pulse/sec", 1 },
-
-  { "m",  handlerM,   "d",    "Move +/- d full pulses", 2 },
+  { "s",  handlerS,    "v",   "Speed set to v full step/sec", 2 },
+  { "m",  handlerM,   "d",    "Move +/- d full steps", 2 },
   { "mh", handlerMH,  "",     "Move Home", 2 },
-  { "mp", handlerMP,   "",    "Move Position to go report", 2 },
+  { "mp", handlerMP,   "",    "display Move Position to-go", 2 },
 
   { "le", handlerLE,   "n",   "motor Lock enable (n=1) or disable (n=0)", 3 },
   { "lt", handlerLT,   "t",   "motor Lock release Time (t=0..255) 0.1 sec units", 3 },
@@ -200,6 +199,8 @@ void setup(void)
 
 void loop(void)
 {
-  if (!S.isAutoRun()) S.run();
+#if !ENABLE_AUTORUN
+  S.run();
+#endif
   CP.run();
 }

@@ -112,8 +112,8 @@ Public Types</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr><td colspan="2"><div class="groupHeader">Class constructor and destructor.</div></td></tr>
-<tr class="memitem:a832f1e843b73846f4209fb2e55b4fc81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a832f1e843b73846f4209fb2e55b4fc81">MD_Stepper</a> (uint8_t inA, uint8_t inB, uint8_t inC, uint8_t inD, uint16_t speedMax=SPEEDMAX_DEFAULT)</td></tr>
-<tr class="separator:a832f1e843b73846f4209fb2e55b4fc81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac84a8bb4976708a6e2fcc25f81cc5577"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#ac84a8bb4976708a6e2fcc25f81cc5577">MD_Stepper</a> (uint8_t inA1, uint8_t inA2, uint8_t inB1, uint8_t inB2)</td></tr>
+<tr class="separator:ac84a8bb4976708a6e2fcc25f81cc5577"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8f5f2cb2e241f8e2b1ff1e3cea97920"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#aa8f5f2cb2e241f8e2b1ff1e3cea97920">~MD_Stepper</a> (void)</td></tr>
 <tr class="separator:aa8f5f2cb2e241f8e2b1ff1e3cea97920"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Methods for core object control.</div></td></tr>
@@ -134,10 +134,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a65ec7faa864eb5e5574fcd33aa5641d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ff6387b4cb9d14d8345456db4654f21"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a7ff6387b4cb9d14d8345456db4654f21">getPosition</a> (void)</td></tr>
 <tr class="separator:a7ff6387b4cb9d14d8345456db4654f21"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a022a1ff570a114c15281786a376f7c76"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a022a1ff570a114c15281786a376f7c76">getMaxSpeed</a> (void)</td></tr>
-<tr class="separator:a022a1ff570a114c15281786a376f7c76"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:addd219cbb5a2091c4df680ef55bdf5eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#addd219cbb5a2091c4df680ef55bdf5eb">setMaxSpeed</a> (uint16_t s)</td></tr>
-<tr class="separator:addd219cbb5a2091c4df680ef55bdf5eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72a3a404690e8378d7fe4beb9fb3c328"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a72a3a404690e8378d7fe4beb9fb3c328">getSpeed</a> (void)</td></tr>
 <tr class="separator:a72a3a404690e8378d7fe4beb9fb3c328"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2688ac05d2d17bf75cdbb041b77dd30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30">setSpeed</a> (uint16_t s)</td></tr>
@@ -218,8 +214,8 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 </div>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a832f1e843b73846f4209fb2e55b4fc81" name="a832f1e843b73846f4209fb2e55b4fc81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a832f1e843b73846f4209fb2e55b4fc81">&#9670;&nbsp;</a></span>MD_Stepper()</h2>
+<a id="ac84a8bb4976708a6e2fcc25f81cc5577" name="ac84a8bb4976708a6e2fcc25f81cc5577"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac84a8bb4976708a6e2fcc25f81cc5577">&#9670;&nbsp;</a></span>MD_Stepper()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -228,31 +224,25 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
           <td class="memname">MD_Stepper::MD_Stepper </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>inA</em>, </td>
+          <td class="paramname"><em>inA1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>inB</em>, </td>
+          <td class="paramname"><em>inA2</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>inC</em>, </td>
+          <td class="paramname"><em>inB1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>inD</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>speedMax</em> = <code>SPEEDMAX_DEFAULT</code>&#160;</td>
+          <td class="paramname"><em>inB2</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -263,14 +253,14 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 </div><div class="memdoc">
 <p >Class Constructor</p>
 <p >Instantiate a new instance of the class.</p>
-<p >The main function for the core object is to set the internal shared variables and timers to default values.</p>
+<p >The main function for the core object is to set the internal setup Parameters and other default values.</p>
+<p >The pins are passed as one pair for coil A and one pair for coil B.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">inA</td><td>pin connected to hardware driver INA or IN1 input (Coil A). </td></tr>
-    <tr><td class="paramname">inB</td><td>pin connected to hardware driver INB or IN2 input (Coil A). </td></tr>
-    <tr><td class="paramname">inC</td><td>pin connected to hardware driver INC or IN3 input (Coil B). </td></tr>
-    <tr><td class="paramname">inD</td><td>pin connected to hardware driver IND or IN4 input (Coil B). </td></tr>
-    <tr><td class="paramname">speedMax</td><td>the maximum speed the motor can work at in steps/second. </td></tr>
+    <tr><td class="paramname">inA1</td><td>pin connected to hardware driver Coil A one side. </td></tr>
+    <tr><td class="paramname">inA2</td><td>pin connected to hardware driver Coil A other side. </td></tr>
+    <tr><td class="paramname">inB1</td><td>pin connected to hardware driver Coil B one side. </td></tr>
+    <tr><td class="paramname">inB2</td><td>pin connected to hardware driver Coil B other side. </td></tr>
   </table>
   </dd>
 </dl>
@@ -381,27 +371,6 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 
 </div>
 </div>
-<a id="a022a1ff570a114c15281786a376f7c76" name="a022a1ff570a114c15281786a376f7c76"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a022a1ff570a114c15281786a376f7c76">&#9670;&nbsp;</a></span>getMaxSpeed()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint16_t MD_Stepper::getMaxSpeed </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Gets the configured maximum speed.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#addd219cbb5a2091c4df680ef55bdf5eb">setMaxSpeed()</a>, <a class="el" href="class_m_d___stepper.html#a832f1e843b73846f4209fb2e55b4fc81">MD_Stepper()</a></dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>the current configured maximum speed </dd></dl>
-
-</div>
-</div>
 <a id="ac9d174de8ce445bc7386f04c6b6648c1" name="ac9d174de8ce445bc7386f04c6b6648c1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac9d174de8ce445bc7386f04c6b6648c1">&#9670;&nbsp;</a></span>getMotorLock()</h2>
 
@@ -484,7 +453,7 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Get the internal ststus byte.</p>
+<p >Get the internal status byte.</p>
 <p >The library maintains internal status bit field of status information. This method returns the bit field as a byte, mainly for debugging purposes.</p>
 <p >The meaning of each status bit is defined in the class' private section.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#a0f699e4c67e3678f29af57d759be2838">getDirection()</a>, <a class="el" href="class_m_d___stepper.html#a6535e97f4473ee67033fd52ad8d88ad8">isBusy()</a>, <a class="el" href="class_m_d___stepper.html#a54466be9c3e02c9c97441b42090c2ee6">enableMotorLock()</a>,</dd></dl>
@@ -508,7 +477,7 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
       </table>
 </div><div class="memdoc">
 <p >Gets the configured running speed.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30">setSpeed()</a>, <a class="el" href="class_m_d___stepper.html#addd219cbb5a2091c4df680ef55bdf5eb">setMaxSpeed()</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30">setSpeed()</a>, setMaxSpeed()</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>the running speed in steps/sec </dd></dl>
 
 </div>
@@ -783,34 +752,6 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 
 </div>
 </div>
-<a id="addd219cbb5a2091c4df680ef55bdf5eb" name="addd219cbb5a2091c4df680ef55bdf5eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#addd219cbb5a2091c4df680ef55bdf5eb">&#9670;&nbsp;</a></span>setMaxSpeed()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void MD_Stepper::setMaxSpeed </td>
-          <td>(</td>
-          <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Gets the configured maximum speed.</p>
-<p >Motors can be practically run up to a maximum speed (steps/sec). The library can be configured with this speed to allow upper-bound checks. This method sets the maximum speed for the instance of the library. The setting can also be set as an optional parameter in the class constructor.</p>
-<p >As the speed is specified in steps/sec, the current motor stepping mode has an effect. HALF stepping results in half the physical speed of a FULL or WAVE stepping for the same numeric setting.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#a022a1ff570a114c15281786a376f7c76">getMaxSpeed()</a>, <a class="el" href="class_m_d___stepper.html#a832f1e843b73846f4209fb2e55b4fc81">MD_Stepper()</a></dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>the maximum speed in steps/sec </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="aceb79a58d32287014a6c102679d444ec" name="aceb79a58d32287014a6c102679d444ec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aceb79a58d32287014a6c102679d444ec">&#9670;&nbsp;</a></span>setMotorLockTime()</h2>
 
@@ -855,10 +796,10 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
       </table>
 </div><div class="memdoc">
 <p >Set the running speed.</p>
-<p >The motor speed can be set to any value between 0 and the configured maximum speed. Speeds higher than the maximum are capped at the maximum. Setting the motor speed to 0 has the same effect as a <a class="el" href="class_m_d___stepper.html#a452edf1c05261d7f010775a0cd7ab174">stop()</a>.</p>
+<p >The motor speed can be set to any value but speeds higher than the motor maximum attainable speed will result in it stalling. Setting the motor speed to 0 has the same effect as a <a class="el" href="class_m_d___stepper.html#a452edf1c05261d7f010775a0cd7ab174">stop()</a>.</p>
 <p >The new speed takes effect at the next motor step (immediately if running or at the next <a class="el" href="class_m_d___stepper.html#a4328bdf9c9e28eb34b89cf9082278b48">start()</a>).</p>
-<p >As the speed is specified in steps/sec, the current motor stepping mode has an effect. HALF stepping results in half the physical speed of a FULL or WAVE stepping fore the same numeric setting.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#a72a3a404690e8378d7fe4beb9fb3c328">getSpeed()</a>, <a class="el" href="class_m_d___stepper.html#addd219cbb5a2091c4df680ef55bdf5eb">setMaxSpeed()</a></dd></dl>
+<p >As the speed is specified in steps/sec, the current motor stepping mode has an effect. HALF stepping results in half the physical speed of a FULL or WAVE stepping for the same numeric setting, so when the mode is changed all items mesaured in steps or steps per unit time are adjusted appropriately.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#a72a3a404690e8378d7fe4beb9fb3c328">getSpeed()</a>, setMode()</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>the required running speed in steps/sec </td></tr>
@@ -950,7 +891,7 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_m_d___stepper.html">MD_Stepper</a></li>
-    <li class="footer">Generated on Thu Sep 16 2021 11:10:33 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
+    <li class="footer">Generated on Sat Sep 18 2021 14:19:34 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
   </ul>
 </div>
 </body>

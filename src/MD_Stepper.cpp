@@ -10,13 +10,12 @@
  * \brief Code file for MD_Stepper library class.
  */
 
-MD_Stepper::MD_Stepper(uint8_t inA, uint8_t inB, uint8_t inC, uint8_t inD, uint16_t speedMax)
+MD_Stepper::MD_Stepper(uint8_t inA1, uint8_t inA2, uint8_t inB1, uint8_t inB2)
 {
-  _in[0] = inA;
-  _in[1] = inB;
-  _in[2] = inC;
-  _in[3] = inD;
-  setMaxSpeed(speedMax);
+  _in[0] = inA1;
+  _in[1] = inB1;   // note this is deliberately ...
+  _in[2] = inA2;   // ... swapped with this one!
+  _in[3] = inB2;
 };
 
 MD_Stepper::~MD_Stepper(void)
@@ -117,19 +116,15 @@ void MD_Stepper::enableMotorLock(bool b)
     _timeMark = millis();
 }
 
-void MD_Stepper::setMaxSpeed(uint16_t s) 
-{ 
-  if (s > 0) _speedMax = s; 
-  if (_speedSet > s) setSpeed(s); 
-}
-
 void MD_Stepper::setSpeed(uint16_t s) 
 { 
   if (_speedSet == s) return;
-  if (s > _speedMax) s = _speedMax;
 
   _speedSet = s;
-  calcStepTick(_speedSet);
+  if (s == 0) 
+    stop();
+  else
+    calcStepTick(_speedSet);
 }
 
 void MD_Stepper::setStepMode(stepMode_t mode)
@@ -151,13 +146,11 @@ void MD_Stepper::setStepMode(stepMode_t mode)
     _stepCount /= 2;
     _moveCountSet /= 2;
     setSpeed(_speedSet / 2);
-    _speedMax /= 2;
   }
   else if (mode == HALF)  // changing to HALF 
   {
     _stepCount *= 2;
     _moveCountSet *= 2;
-    _speedMax *= 2;
     setSpeed(_speedSet * 2);
   }
 }
@@ -168,8 +161,12 @@ bool MD_Stepper::run(void)
 {
   bool b = false;
 
-  if (_runState != IDLE) 
+  if (_runState != IDLE)
+  {
     b = runFSM();
+
+    if (b) _stepCount += ((flagChk(_status, S_FWD)) ? 1 : -1);
+  }
   else // not running at all - handle the lock release
   { 
     if (!flagChk(_options, O_LOCKED) && flagChk(_status, S_LOCKED))
@@ -184,8 +181,6 @@ bool MD_Stepper::run(void)
       }
     }
   }
-
-  if (b) _stepCount += ((flagChk(_status, S_FWD)) ? 1 : -1);
 
   if (_pinBusy != 0xff)
     digitalWrite(_pinBusy, flagChk(_status, S_BUSY) ? HIGH : LOW);
@@ -206,10 +201,10 @@ void MD_Stepper::move(int32_t dist)
 
 inline void MD_Stepper::calcStepTick(uint16_t spd)
   // Calculate the step delay (microseconds) given the 
-  // requested speed (steps/sec) and stepper mode.
+  // requested speed (steps/sec)
 {
   if (spd != 0)
-    _stepTick = 100000L / spd;
+    _stepTick = 1000000L / spd;
   PRINT("\nus/pulse: ", _stepTick);
 }
 
@@ -224,37 +219,51 @@ bool MD_Stepper::runFSM(void)
     break;
 
   case INIT:                // initialize before the next run
-    if ((!flagChk(_status, S_RUNMOVE) && _speedSet == 0) ||  // free run with no speed set, don't do anything
+    PRINTS("\n->INIT");
+    if ((_speedSet == 0) ||                                  // no speed set doesn't do anything
         (flagChk(_status, S_RUNMOVE) && _moveCountSet == 0)) // move run with no moves set, also don't do anything
     {
-      flagClr(_status, S_RUNMOVE);
+      PRINT(" not starting: SpSet[", _speedSet);
+      PRINT("] Mv[", flagChk(_status, S_RUNMOVE));
+      PRINT("] MvSet[", _moveCountSet);
+      PRINTS("]");
+      if (_moveCountSet == 0) flagClr(_status, S_RUNMOVE);
+      _runState = IDLE;
+      PRINTS("\n->to IDLE");
     }
     else
     {
+      PRINTS(" starting");
       flagSet(_status, S_BUSY);
       flagClr(_status, S_LOCKED);
-      calcStepTick(_speedSet);
       _runState = RUN;
       _timeMark = 0;    // force a move first up
     }
-    // deliberately fall through
+    break;
 
-  case RUN:                 // running the motor
-    if (micros() - _timeMark >= _stepTick)
+  case RUN:             // running the motor
     {
-      // time for a step has expired, run the motor
-      singleStep();
-      if (flagChk(_status, S_RUNMOVE))
+      uint32_t now = micros();
+
+      if (now - _timeMark >= _stepTick)
       {
-        _moveCountSet--;
-        if (_moveCountSet == 0) _runState = STOP;
+        // time for a step has expired, run the motor
+        PRINT("\n->RUN ", now - _timeMark);
+        PRINT("/", _stepTick);
+        _timeMark = now;
+        singleStep();
+        if (flagChk(_status, S_RUNMOVE))
+        {
+          _moveCountSet--;
+          if (_moveCountSet == 0) _runState = STOP;
+        }
+        b = true;
       }
-      b = true;
-      _timeMark = micros();
     }
     break;
 
   case STOP:                // stopping the motor
+    PRINTS("\n->STOP");
     flagClr(_status, S_BUSY);
     flagClr(_status, S_RUNMOVE);
     flagSet(_status, S_LOCKED);
@@ -288,8 +297,12 @@ void MD_Stepper::singleStep(void)
   if (_seqCur & 1) stepPattern >>= 4;      // odd step patterns are in the high nybble
 
   // now set the relevant outputs
+  //PRINT(" SS #", _seqCur);
   for (uint8_t i = 0; i < MAX_PINS; i++)
+  {
     digitalWrite(_in[i], (stepPattern & _BV(i)) ? HIGH : LOW);
+    //PRINT(" ", (stepPattern & _BV(i)) ? 1 : 0);
+  }
 
   // adjust for next pass - note this exploits that the size of steps is
   // either 4 (0..3) or 8 (0..7) to keep the index in bounds.

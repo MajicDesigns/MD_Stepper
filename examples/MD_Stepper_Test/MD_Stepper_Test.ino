@@ -148,7 +148,7 @@ void handlerG(char* param)
   Serial.print(F("\nPosition: "));
   Serial.print(S.getPosition());
   Serial.print(F("\nDirection: "));
-  Serial.print(S.getDirection() ? 'F' : 'R');
+  Serial.print(S.isForward() ? 'F' : 'R');
   Serial.print(F("\nStep Mode: "));
   Serial.print(mode2sz());
   Serial.print(F("\n\n== Options"));
@@ -156,6 +156,8 @@ void handlerG(char* param)
   Serial.print(S.getMotorLock() ? F("on") : F("off"));
   Serial.print(F("\nLock Time: "));
   Serial.print(S.getMotorLockTime());
+  Serial.print(F("\nMotor Locked: "));
+  Serial.print(S.isMotorLocked() ? F("yes") : F("no"));
   Serial.print(F("\n\n"));
 }
 

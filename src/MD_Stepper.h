@@ -23,35 +23,35 @@ as shown in the figure below.
 
 ![Motor Connection Diagram] (Motor_Connections.png "Motor Connections")
 
-### Specific Tested Motor Configurations
+### Tested Motor Configurations
 
 ![28BYJ-48] (Motor_28BYJ-48.png "28BYJ-48 Connections")
 
 _28BYJ-48 with ULN2003 driver_ - Unipolar stepper with coil wire pairs
 BLU/YLW, ORN/PNK and common RED. I/O pin wiring INA1 to IND, INA2/INB,
-INB1/INC, INB2/INA.
+INB1/INC, INB2/INA. This motor can be modified be a bipolar motor - 
+https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/ (verified works).
 
 ## Important Notes
-- This library uses AVR TIMER1 or TIMER2 to implement the interrupt
-driven clock. TIMER0 is used by the Arduino millis() clock, TIMER1
-is commonly used by the Servo library and TIMER2 by the Tone library.
-Change USE_TIMER (defined at the top of the header file) to select
-which timer is enabled in the library code.
-
-- With ENABLE_AUTORUN disabled, this library will function on all 
-hardware architectures but run() needs to be called each iteration 
+- With ENABLE_AUTORUN disabled, this library will function on all
+hardware architectures but run() needs to be called each iteration
 through loop().
 
-- With ENABLE_AUTORUN enabled, This library is limited to AVR 
-architectures and run() will be invoked by a timer ISR, effectively 
+- By enabling ENABLE_AUTORUN, this library is limited to AVR
+architectures and run() will be invoked by a timer ISR, effectively
 driving the motor management as a background process.
+
+- With ENABLE_AUTORUN enabled, this library uses AVR TIMER1 or TIMER2
+to implement the interrupt driven clock. TIMER0 is used by the Arduino 
+millis() clock, TIMER1 is commonly used by the Servo library and TIMER2 
+by the Tone library. Change USE_TIMER (defined at the top of the header 
+file) to select which timer is enabled in the library code.
 
 - This library has been tested on Arduino Uno and Nano (ie, 328P processor).
 
-- TIMERn is a global resource, so each concurrent object instance is driven 
-from the same TIMERn interrupt. The constant MAX_INSTANCE is used to set 
-limits the global maximum for instances allowed to be processed by the 
-interrupt.
+- TIMERn is a global resource, so each concurrent class instance is driven 
+from the same TIMERn interrupt. The constant MAX_INSTANCE is used to limit
+the global maximum for instances allowed to be processed by the same interrupt.
 
 See Also
 - \subpage pageRevisionHistory
@@ -80,6 +80,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \page pageRevisionHistory Revision History
+Sep 2021 ver 1.0.2
+- Standardised status methods
+- Added PositionControlDual example
+
 Sep 2021 ver 1.0.1
 - Fixed small issues, eliminated maxSpeed concepts
 - Clearer documentation for required connections
@@ -245,21 +249,6 @@ public:
   */
 
  /**
-  * Get the current motor direction.
-  *
-  * Returns the current direction of the motor. By convention the forward
-  * direction is 'true' and the reverse is 'false'.
-  * 
-  * Note that forward and reverse have no inherent meaning other than they 
-  * are in opposite rotational directions.
-  * 
-  * \sa setDirection()
-  * 
-  * \return true if the motor is moving in the 'forward' direction
-  */
-  inline bool getDirection(void)   { return(flagChk(_status, S_FWD)); }
-
- /**
   * Set the current motor direction.
   *
   * Set the current rotation direction for the motor. By convention the 
@@ -390,7 +379,7 @@ public:
   /** @} */
 
  //--------------------------------------------------------------
- /** \name Methods for hardware and options management.
+ /** \name Methods for status and hardware options management.
   * @{
   */
  /**
@@ -420,6 +409,44 @@ public:
    */
   inline bool isAutoRun(void) { return(flagChk(_status, S_AUTORUN)); }
   
+ /**
+  * Check if motor direction is forward.
+  *
+  * Returns true if the current motor direction is forward. By convention the forward
+  * direction is 'true' and the reverse is 'false'.
+  * 
+  * Note that forward and reverse have no inherent meaning other than they 
+  * are in opposite rotational directions.
+  * 
+  * \sa setDirection()
+  * 
+  * \return true if the motor is moving in the 'forward' direction, false otherwise
+  */
+  inline bool isForward(void)   { return(flagChk(_status, S_FWD)); }
+
+ /**
+  * Check if motor is currently locked.
+  *
+  * Returns true if current condition of the motors is stopped and motor locked.
+  * 
+  * \sa setMotorLock(), getMotorLock()
+  * 
+  * \return true if the motor is currently locked, false otherwise
+  */
+  inline bool isMotorLocked(void)   { return(flagChk(_status, S_MOTORLOCK) && !isBusy()); }
+
+ /**
+  * Check if next/current motion is a move.
+  *
+  * Returns true if the motion control is set for or currently executing a move() and
+  * not free running. If the move is currently happening then isBusy() will also be true.
+  * 
+  * \sa isBusy(), move()
+  * 
+  * \return true if the motion is move and not free running.
+  */
+  inline bool isMoveEnabled(void)   { return(flagChk(_status, S_RUNMOVE)); }
+
   /**
   * Set pin for hardware busy status.
   *
@@ -534,9 +561,11 @@ public:
   * The library maintains internal status bit field of status information.
   * This method returns the bit field as a byte, mainly for debugging purposes. 
   * 
-  * The meaning of each status bit is defined in the class' private section.
+  * The meaning of each status bit is defined in the class' private section and 
+  * can be obtained separately using one of the is*() methods.
   *
-  * \sa getDirection(), isBusy(), enableMotorLock(), 
+  * \sa getDirection(), isBusy(), isMoveEnabled() isMotorLocked(), isForward()
+  * \sa isAutoRun()
   *
   * \return the status byte
   */
@@ -613,7 +642,7 @@ public:
   static MD_Stepper* _cbInstance[];   ///< ISR - Callback instance handle per pin slot
 
  /**
-  * ISR - Set the timer frequecy for the
+  * ISR - Set the timer frequency for the
   *
   * NOT FOR END USER APPLICATIONS!
   * 

@@ -27,7 +27,7 @@ void setup(void)
   S.setStepMode(MD_Stepper::HALF);
 }
 
-void loop() 
+void loop(void) 
 {
   uint16_t pot = analogRead(POT_PIN);
   uint16_t speed = map(pot, 0, 1023, 0, 2000);

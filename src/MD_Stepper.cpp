@@ -248,8 +248,8 @@ bool MD_Stepper::runFSM(void)
       if (now - _timeMark >= _stepTick)
       {
         // time for a step has expired, run the motor
-        PRINT("\n->RUN ", now - _timeMark);
-        PRINT("/", _stepTick);
+        //PRINT("\n->RUN ", now - _timeMark);
+        //PRINT("/", _stepTick);
         _timeMark = now;
         singleStep();
         if (flagChk(_status, S_RUNMOVE))

@@ -31,6 +31,7 @@ var class_m_d___stepper =
     [ "setMotorLockTime", "class_m_d___stepper.html#aceb79a58d32287014a6c102679d444ec", null ],
     [ "setSpeed", "class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30", null ],
     [ "setStepMode", "class_m_d___stepper.html#a443a9ea53632fff0b9762896ef2c05fb", null ],
+    [ "setVelocity", "class_m_d___stepper.html#ae3368176bbd9d588acbcdae1531cb2b4", null ],
     [ "start", "class_m_d___stepper.html#a4328bdf9c9e28eb34b89cf9082278b48", null ],
     [ "stop", "class_m_d___stepper.html#a452edf1c05261d7f010775a0cd7ab174", null ],
     [ "_bInitialised", "class_m_d___stepper.html#a853259850f99008b325cd27c9fb69cfe", null ],

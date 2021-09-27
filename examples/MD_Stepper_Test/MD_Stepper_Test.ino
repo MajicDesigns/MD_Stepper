@@ -90,7 +90,7 @@ void handlerD(char* param)
 
   S.setDirection(b);
   Serial.print(F("\nDirection: "));
-  Serial.print(S.getDirection() ? 'F' : 'R');
+  Serial.print(S.isForward() ? 'F' : 'R');
 }
 
 void handlerMO(char* param)

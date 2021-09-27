@@ -81,8 +81,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \page pageRevisionHistory Revision History
 Sep 2021 ver 1.0.2
-- Standardised status methods
-- Added PositionControlDual example
+- Standardized status field methods
+- Added PositionControlDual, TorqueTest examples
+- Added setVelocity() - speed & direction
 
 Sep 2021 ver 1.0.1
 - Fixed small issues, eliminated maxSpeed concepts
@@ -322,6 +323,21 @@ public:
   */
   void setSpeed(uint16_t s);
 
+/**
+  * Set the velocity (speed and direction).
+  *
+  * Sets the new velocity. positive velocity is forward movement, negative
+  * velocity reverse movement. This is a wrapper for setDirection() and 
+  * setSpeed().
+  *
+  * As velocity is specified in steps/sec.
+  *
+  * \sa setSpeed(), setDirection()
+  *
+  * \param v the required velocity in steps/sec
+  */
+  void setVelocity(int16_t v) { setDirection(v > 0); if (v < 0) v = -v;  setSpeed(v); }
+
  /**
   * Set the number of steps to move.
   *
@@ -433,7 +449,7 @@ public:
   * 
   * \return true if the motor is currently locked, false otherwise
   */
-  inline bool isMotorLocked(void)   { return(flagChk(_status, S_MOTORLOCK) && !isBusy()); }
+  inline bool isMotorLocked(void)   { return(flagChk(_status, S_LOCKED) && !isBusy()); }
 
  /**
   * Check if next/current motion is a move.

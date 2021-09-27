@@ -136,6 +136,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a72a3a404690e8378d7fe4beb9fb3c328"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2688ac05d2d17bf75cdbb041b77dd30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30">setSpeed</a> (uint16_t s)</td></tr>
 <tr class="separator:ae2688ac05d2d17bf75cdbb041b77dd30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3368176bbd9d588acbcdae1531cb2b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#ae3368176bbd9d588acbcdae1531cb2b4">setVelocity</a> (int16_t v)</td></tr>
+<tr class="separator:ae3368176bbd9d588acbcdae1531cb2b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14f0e5332d8bf7ae482054783c57a5ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a14f0e5332d8bf7ae482054783c57a5ff">move</a> (int32_t dist)</td></tr>
 <tr class="separator:a14f0e5332d8bf7ae482054783c57a5ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50585bff212886ad7d975aa94ce5705b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a50585bff212886ad7d975aa94ce5705b">moveToGo</a> (void)</td></tr>
@@ -888,6 +890,34 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 
 </div>
 </div>
+<a id="ae3368176bbd9d588acbcdae1531cb2b4" name="ae3368176bbd9d588acbcdae1531cb2b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3368176bbd9d588acbcdae1531cb2b4">&#9670;&nbsp;</a></span>setVelocity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MD_Stepper::setVelocity </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>v</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Set the velocity (speed and direction).</p>
+<p >Sets the new velocity. positive velocity is forward movement, negative velocity reverse movement. This is a wrapper for <a class="el" href="class_m_d___stepper.html#af6e789137d6ecc03772674d4fa4708ba">setDirection()</a> and <a class="el" href="class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30">setSpeed()</a>.</p>
+<p >As velocity is specified in steps/sec.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30">setSpeed()</a>, <a class="el" href="class_m_d___stepper.html#af6e789137d6ecc03772674d4fa4708ba">setDirection()</a></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>the required velocity in steps/sec </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a4328bdf9c9e28eb34b89cf9082278b48" name="a4328bdf9c9e28eb34b89cf9082278b48"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4328bdf9c9e28eb34b89cf9082278b48">&#9670;&nbsp;</a></span>start()</h2>
 
@@ -941,7 +971,7 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_m_d___stepper.html">MD_Stepper</a></li>
-    <li class="footer">Generated on Sun Sep 19 2021 11:44:37 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
+    <li class="footer">Generated on Mon Sep 27 2021 12:19:15 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
   </ul>
 </div>
 </body>

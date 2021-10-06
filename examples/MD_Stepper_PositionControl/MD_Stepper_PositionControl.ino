@@ -49,7 +49,5 @@ void loop(void)
       S.start();
     }
   }
-#if !ENABLE_AUTORUN
   S.run();
-#endif
 }

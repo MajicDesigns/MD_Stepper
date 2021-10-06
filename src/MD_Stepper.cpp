@@ -10,12 +10,24 @@
  * \brief Code file for MD_Stepper library class.
  */
 
+ // Step patterns data is defined as bits in a nybble, one bit per output pin.
+ // - For each nybble the LSB is the state if _in[0], next up _in[1], etc.
+ // - The lower nybble in a byte is the even numbered step, the high nybble
+ //   the odd numbered step.
+ // - Each array of step data containg 4 bytes. The shorter sequqnces are repeated
+ //   to fill out to the longest (HALF wave) siuze of table.
+ // 
+const uint8_t WAVETABLE_SIZE = 4;
+const PROGMEM uint8_t MD_Stepper::stepFull[WAVETABLE_SIZE] = { 0x63, 0x9c, 0x63, 0x9c }; // 4 full steps: AB-BC-CD-DA pattern, repeated
+const PROGMEM uint8_t MD_Stepper::stepWave[WAVETABLE_SIZE] = { 0x21, 0x84, 0x21, 0x84 }; // 4 wave steps: A-B-C-D pattern, repeated
+const PROGMEM uint8_t MD_Stepper::stepHalf[WAVETABLE_SIZE] = { 0x31, 0x62, 0xc4, 0x98 }; // 8 half steps: A-AB-B-BC-C-CD-D-DA pattern
+
 MD_Stepper::MD_Stepper(uint8_t inA1, uint8_t inA2, uint8_t inB1, uint8_t inB2)
 {
-  _in[0] = inA1;
-  _in[1] = inB1;   // note this is deliberately ...
-  _in[2] = inA2;   // ... swapped with this one!
-  _in[3] = inB2;
+  _pin[0].id = inA1;
+  _pin[1].id = inB1;   // note this is deliberately ...
+  _pin[2].id = inA2;   // ... swapped with this one!
+  _pin[3].id = inB2;
 };
 
 MD_Stepper::~MD_Stepper(void)
@@ -38,14 +50,18 @@ void MD_Stepper::begin(uint8_t busyPin)
 {
   setBusyPin(busyPin);
 
-  // set step motor pins as OUTPUT
+  // set step motor pins as OUTPUT and get the port/bit
   for (uint8_t i = 0; i < MAX_PINS; i++)
-    pinMode(_in[i], OUTPUT);
+  {
+    pinMode(_pin[i].id, OUTPUT);
+    _pin[i].reg = portOutputRegister(digitalPinToPort(_pin[i].id)); // output pin register
+    _pin[i].mask = digitalPinToBitMask(_pin[i].id);                 // mask for pin in that register
+  }
 
   // initialise default values
   _status = _options = 0;
   _moveCountSet = _stepCount = 0;
-  setStepMode(FULL);
+  setStepMode(HALF);
   setDirection(true);
   setMotorLockTime(20);
   enableMotorLock(false);
@@ -129,63 +145,44 @@ void MD_Stepper::setSpeed(uint16_t s)
 
 void MD_Stepper::setStepMode(stepMode_t mode)
 {
-  if (mode == _stepMode)
-    return;
-
   stepMode_t sm = getStepMode();  // remember current mode
 
   // now record the change and recalculate a full/half step delay
+#if ENABLE_AUTORUN
+  // disable interrupts as we are changing the table references 
+  // that are used by the interrupt driven stepping.
+  noInterrupts();
+#endif
   _stepMode = mode;
-  _seqCur = 0;
+  _stepCur = 0;
+  switch (mode)
+  {
+  case WAVE: _stepTable = stepWave; break;
+  case FULL: _stepTable = stepFull; break;
+  case HALF: _stepTable = stepHalf; break;
+  }
   calcStepTick(_speedSet);
 
   // and if we are changing number of steps/cycle also halve 
   // or double counts, speeds, etc.
-  if (sm == HALF)         // currently doing HALF
+  if (sm != mode)           // we are actually making a change
   {
-    _stepCount /= 2;
-    _moveCountSet /= 2;
-    setSpeed(_speedSet / 2);
-  }
-  else if (mode == HALF)  // changing to HALF 
-  {
-    _stepCount *= 2;
-    _moveCountSet *= 2;
-    setSpeed(_speedSet * 2);
-  }
-}
-
-bool MD_Stepper::run(void)
-// run the appropriate motion sequence
-// called from loop() or within the ISR when ENABLE_AUTORUN
-{
-  bool b = false;
-
-  if (_runState != IDLE)
-  {
-    b = runFSM();
-
-    if (b) _stepCount += ((flagChk(_status, S_FWD)) ? 1 : -1);
-  }
-  else // not running at all - handle the lock release
-  { 
-    if (!flagChk(_options, O_LOCKED) && flagChk(_status, S_LOCKED))
+    if (sm == HALF)         // currently doing HALF
     {
-      if (millis() - _timeMark >= _timeLockRelease)
-      {
-        for (uint8_t i = 0; i < MAX_PINS; i++)
-          digitalWrite(_in[i], LOW);
-
-        PRINTS("\nLock released");
-        flagClr(_status, S_LOCKED);
-      }
+      _stepCount /= 2;
+      _moveCountSet /= 2;
+      setSpeed(_speedSet / 2);
+    }
+    else if (mode == HALF)       // changing to HALF 
+    {
+      _stepCount *= 2;
+      _moveCountSet *= 2;
+      setSpeed(_speedSet * 2);
     }
   }
-
-  if (_pinBusy != 0xff)
-    digitalWrite(_pinBusy, flagChk(_status, S_BUSY) ? HIGH : LOW);
-
-  return(b);
+#if ENABLE_AUTORUN
+  interrupts();
+#endif
 }
 
 void MD_Stepper::move(int32_t dist)
@@ -208,17 +205,26 @@ inline void MD_Stepper::calcStepTick(uint16_t spd)
   PRINT("\nus/pulse: ", _stepTick);
 }
 
-bool MD_Stepper::runFSM(void)
+void MD_Stepper::run(void)
 // return true if a step was executed
 {
-  bool b = false;
-
   switch (_runState)
   {
-  case IDLE:                // not doing anything at the moment
+  case STP_IDLE:                // not doing anything at the moment
+    if (!flagChk(_options, O_LOCKED) && flagChk(_status, S_LOCKED))
+    {
+      if (millis() - _timeMark >= _timeLockRelease)
+      {
+        for (uint8_t i = 0; i < MAX_PINS; i++)
+          digitalWrite(_pin[i].id, LOW);
+
+        PRINTS("\nLock released");
+        flagClr(_status, S_LOCKED);
+      }
+    }
     break;
 
-  case INIT:                // initialize before the next run
+  case STP_INIT:                // initialize before the next run
     PRINTS("\n->INIT");
     if ((_speedSet == 0) ||                                  // no speed set doesn't do anything
         (flagChk(_status, S_RUNMOVE) && _moveCountSet == 0)) // move run with no moves set, also don't do anything
@@ -228,87 +234,90 @@ bool MD_Stepper::runFSM(void)
       PRINT("] MvSet[", _moveCountSet);
       PRINTS("]");
       if (_moveCountSet == 0) flagClr(_status, S_RUNMOVE);
-      _runState = IDLE;
+      _runState = STP_IDLE;
       PRINTS("\n->to IDLE");
     }
     else
     {
-      PRINTS(" starting");
+      PRINTS(" starting to RUN");
       flagSet(_status, S_BUSY);
       flagClr(_status, S_LOCKED);
-      _runState = RUN;
+      _runState = STP_RUN;
       _timeMark = 0;    // force a move first up
     }
     break;
 
-  case RUN:             // running the motor
-    {
-      uint32_t now = micros();
-
-      if (now - _timeMark >= _stepTick)
-      {
-        // time for a step has expired, run the motor
-        //PRINT("\n->RUN ", now - _timeMark);
-        //PRINT("/", _stepTick);
-        _timeMark = now;
-        singleStep();
-        if (flagChk(_status, S_RUNMOVE))
-        {
-          _moveCountSet--;
-          if (_moveCountSet == 0) _runState = STOP;
-        }
-        b = true;
-      }
-    }
+  case STP_RUN:                 // running the motor
+#if !ENABLE_AUTORUN
+    runStepISR();
+#endif
     break;
 
-  case STOP:                // stopping the motor
-    PRINTS("\n->STOP");
+  case STP_STOP:                // stopping the motor
+    PRINTS("\n->STOP!!");
     flagClr(_status, S_BUSY);
     flagClr(_status, S_RUNMOVE);
     flagSet(_status, S_LOCKED);
-    _runState = IDLE;      // next stage is to wait until something start up again
-    _timeMark = millis();  // for lock release later if option enabled
+    _runState = STP_IDLE;      // next stage is to wait until something start up again
+    _timeMark = millis();      // for lock release later if option enabled
     break;
   }
 
-  return(b);
+  // write the current busy status to output pin if it is defined
+  if (_pinBusy != 0xff)
+    digitalWrite(_pinBusy, flagChk(_status, S_BUSY) ? HIGH : LOW);
 }
 
-void MD_Stepper::singleStep(void)
+void MD_Stepper::runStepISR(void)
+// ISR run to step the motors
 {
-  // Step patterns are defined as bits in a nybble, one bit per output pin.
-  // - For each nybble the LSB is the state if _in[0], next up _in[1], etc.
-  // - The lower nybble in a byte is the even numbered step, the high nybble
-  //   the odd numbered step.
-  // - Each array of step data contains the number of steps in the first element,
-  //   followed by the actual step patterns steps (eg, 8 steps will have 4 bytes
-  //   following).
-  // 
-  static uint8_t stepFull[] = { 4, 0x63, 0x9c };             // 4 full steps: AB-BC-CD-DA pattern
-  static uint8_t stepWave[] = { 4, 0x21, 0x84 };             // 4 wave steps: A-B-C-D pattern
-  static uint8_t stepHalf[] = { 8, 0x31, 0x62, 0xc4, 0x98 }; // 8 half steps: A-AB-B-BC-C-CD-D-DA pattern
-  static uint8_t* table[] = { stepFull, stepWave, stepHalf };
+  if (_runState != STP_RUN)
+    return;
 
-  uint8_t *steps = table[_stepMode];
-  uint8_t stepPattern = steps[(_seqCur >> 1) + 1]; // divide by 2 and offet 1 (the first element)
+  uint32_t now = micros();
 
-  // retrieve the relevant step pattern
-  if (_seqCur & 1) stepPattern >>= 4;      // odd step patterns are in the high nybble
-
-  // now set the relevant outputs
-  //PRINT(" SS #", _seqCur);
-  for (uint8_t i = 0; i < MAX_PINS; i++)
+  if (now - _timeMark >= _stepTick)     // time for a step has expired, step the motor
   {
-    digitalWrite(_in[i], (stepPattern & _BV(i)) ? HIGH : LOW);
-    //PRINT(" ", (stepPattern & _BV(i)) ? 1 : 0);
+    // now step the motor
+    uint8_t stepPattern = pgm_read_byte(_stepTable + (_stepCur >> 1));  // divide by 2
+
+    // retrieve the relevant step pattern
+    // note: odd step patterns are in the high nybble
+    if (_stepCur & 1) stepPattern >>= 4;
+
+    // now set the relevant outputs
+    //PRINT("\n S", _seqCur);
+    for (uint8_t i = 0; i < MAX_PINS; i++)
+    {
+      //digitalWrite(_pin[i].id, (stepPattern & _BV(i)) ? HIGH : LOW);
+      //PRINT(" ", (stepPattern & _BV(i)) ? 1 : 0);
+      if (stepPattern & _BV(i))
+        *_pin[i].reg |= _pin[i].mask;   // HIGH
+      else
+        *_pin[i].reg &= ~_pin[i].mask;  // LOW
+    }
+
+    // adjust for next pass - note this exploits that the size of steps tables 
+    // are all 8 steps long ([0..3,0..3] or [0..7] sequence elements) to keep the 
+    // index in bounds.
+    _stepCur = (_stepCur + (flagChk(_status, S_FWD) ? 1 : -1)) & 7;
+    _timeMark = now;                    // save now for next time
+
+    // increment the step count
+    _stepCount += ((flagChk(_status, S_FWD)) ? 1 : -1);
+
+    // if moving only a set number of steps, check this here
+    if (flagChk(_status, S_RUNMOVE))
+    {
+      _moveCountSet--;
+      if (_moveCountSet == 0)
+      {
+        PRINTS("\n-->MOVE END");
+        _runState = STP_STOP;
+      }
+    }
   }
-
-  // adjust for next pass - note this exploits that the size of steps is
-  // either 4 (0..3) or 8 (0..7) to keep the index in bounds.
-  _seqCur = (_seqCur + (flagChk(_status, S_FWD) ? 1 : -1)) & (steps[0]-1);
 }
-
 
 #if ENABLE_AUTORUN
 // AUTORUN enabling functions and data (ISR related)
@@ -328,7 +337,7 @@ ISR(TIMER2_OVF_vect)
   if (MD_Stepper::_instCount)      // only do this if there are pins to process
   {
     for (uint8_t i = 0; i < MD_Stepper::MAX_INSTANCE; i++)
-      if (MD_Stepper::_cbInstance[i] != nullptr) MD_Stepper::_cbInstance[i]->run();
+      if (MD_Stepper::_cbInstance[i] != nullptr) MD_Stepper::_cbInstance[i]->runStepISR();
   }
 }
 

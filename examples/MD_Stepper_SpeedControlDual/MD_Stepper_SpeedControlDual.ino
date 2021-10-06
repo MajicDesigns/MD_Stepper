@@ -52,10 +52,8 @@ void loop(void)
   SB.setSpeed(speed);
   if (!SB.isBusy()) SB.start();
 
-#if !ENABLE_AUTORUN
   SA.run();
   SB.run();
-#endif
 }
 
 

@@ -33,16 +33,13 @@ INB1/INC, INB2/INA. This motor can be modified be a bipolar motor -
 https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/ (verified works).
 
 ## Important Notes
-- With ENABLE_AUTORUN disabled, this library will function on all
-hardware architectures but run() needs to be called each iteration
-through loop().
-
 - By enabling ENABLE_AUTORUN, this library is limited to AVR
-architectures and run() will be invoked by a timer ISR, effectively
-driving the motor management as a background process.
+architectures and motor stepping functions will be invoked by a 
+timer ISR, effectively driving the motor stepping more copnsistently 
+and as a background process.
 
 - With ENABLE_AUTORUN enabled, this library uses AVR TIMER1 or TIMER2
-to implement the interrupt driven clock. TIMER0 is used by the Arduino 
+to implement interrupt driven clock timing. TIMER0 is used by the Arduino 
 millis() clock, TIMER1 is commonly used by the Servo library and TIMER2 
 by the Tone library. Change USE_TIMER (defined at the top of the header 
 file) to select which timer is enabled in the library code.
@@ -52,6 +49,10 @@ file) to select which timer is enabled in the library code.
 - TIMERn is a global resource, so each concurrent class instance is driven 
 from the same TIMERn interrupt. The constant MAX_INSTANCE is used to limit
 the global maximum for instances allowed to be processed by the same interrupt.
+
+- ISR_FREQUENCY is used to set the TIMERn ISR frequency. This affects the 
+max number of steps/s to drive the motor. Higher frequency means more interrupts 
+and less time to do other things (including other interrupts).
 
 See Also
 - \subpage pageRevisionHistory
@@ -80,6 +81,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \page pageRevisionHistory Revision History
+Oct 2021 ver 1.1.0
+- Changed ISR handling for memory and code efficiency
+- Implemented direct I/O for speed
+
 Sep 2021 ver 1.0.2
 - Standardized status field methods
 - Added PositionControlDual, TorqueTest examples
@@ -102,14 +107,14 @@ Sep 2021 ver 1.0.0
  */
 
 #ifndef ENABLE_AUTORUN
-#define ENABLE_AUTORUN 1    ///< 1 enables autorun mode using TIMER ISR
+#define ENABLE_AUTORUN 1    ///< enable/disable autorun mode using TIMER ISR
 #endif
 #if ENABLE_AUTORUN
-#define USE_TIMER 2         ///< Set to use hardware TIMER1 or TIMER2 (1 or 2)
+#define USE_TIMER 1         ///< Set to use hardware TIMER1 or TIMER2 (1 or 2)
 #endif
 
 #ifndef STPDEBUG
-#define STPDEBUG 0      ///< 1 turns library debug output on
+#define STPDEBUG 0         ///< turns library debug output on/off (AUTORUN should be off if DEBUG is on)
 #endif
 
 #if STPDEBUG
@@ -215,7 +220,7 @@ public:
    * 
    * \sa setSpeed(), move(), run(), stop()
    */
-  inline void start(void) { _runState = INIT; }
+  inline void start(void) { _runState = STP_INIT; }
 
   /**
    * Stop movement.
@@ -225,22 +230,23 @@ public:
    *
    * \sa move(), run(), start()
    */
-  inline void stop(void) { _runState = STOP; }
+  inline void stop(void) { _runState = STP_STOP; }
 
   /**
    * Run motion.
    *
-   * if autorun is enabled, then this is called automatically every time the 
-   * ISR is triggered.
-   *
-   * If autorun is not enabled, this needs to be called every iteration through 
-   * loop() to run all the required Stepper management functions.
+   * This needs to be called every iteration through loop() to run all 
+   * the required Stepper management functions.
+   * 
+   * Note that if AUTORUN is not enabled, this will also step the motors.
+   * If AUTORUN is enabled, the motors will be stepped through a timer interrupt
+   * and managed via this call.
    * 
    * \sa start(), stop()
    * 
    * \return true if a step was taken during the method invocation.
    */
-  bool run(void);
+  void run(void);
 
   /** @} */
 
@@ -499,7 +505,7 @@ public:
   * creates a doubling/halving adjustment to current counts and speeds that are defined
   * so that they remain consistent with the new steps generated.
   * 
-  * The library default stepping mode is FULL.
+  * The library default stepping mode is HALF.
   *
   * \sa getStepMode(), \ref stepMode_t
   *
@@ -590,28 +596,42 @@ public:
   /** @} */
 
 private:
-  volatile enum { IDLE, INIT, RUN, STOP } _runState = INIT;
+  // Step pattern tables
+  static const PROGMEM uint8_t stepFull[];
+  static const PROGMEM uint8_t stepWave[];
+  static const PROGMEM uint8_t stepHalf[];
+  static const uint8_t* stepTableLookup[];
 
-  static const uint16_t SPEEDMAX_DEFAULT = 5000; // maximum full steps/second
-  static const uint8_t MAX_PINS = 4;            // max number of control pins
+  // direct pin I/O structure
+  typedef struct
+  {
+    uint8_t id;     // pin id (number)
+    volatile uint8_t *reg;   // pin's direct register
+    uint8_t mask;   // mask for pin within register
+  } pinDirect_t;
 
-  uint8_t _in[MAX_PINS];         // output pins [A..D]
+  volatile enum { STP_IDLE, STP_INIT, STP_RUN, STP_STOP } _runState = STP_INIT;
+
+  static const uint8_t MAX_PINS = 4;            // number of control pins per motor
+
+  pinDirect_t _pin[MAX_PINS];    // output pins [A..D]
   uint8_t _pinBusy;              // hardware 'busy' pin; 255 if not used
   
-  uint32_t _speedSet;            // set speed in full steps (full steps/sec)
-  int32_t  _stepCount;           // current steps and direction since last resetPosition()
-  uint32_t _moveCountSet;        // move pulses target value and to-go counter
+  uint32_t _speedSet;            // set speed in steps/sec valid for current mode setting
+  volatile int32_t  _stepCount;    // current steps and direction since last resetPosition()
+  volatile uint32_t _moveCountSet; // move pulses target value and to-go counter
 
-  uint32_t _stepTick;            // time between each motor step at _speedSet speed, in microseconds
-  uint32_t _timeMark;            // generic time marker for FSM. This could be in milli- or micro-seconds in context
+  volatile uint32_t _stepTick;   // time between each motor step at _speedSet speed, in microseconds
+  volatile uint32_t _timeMark;   // generic time marker for FSM. This could be in milli- or micro-seconds in context
 
   uint16_t _timeLockRelease;     // set time in milliseconds before pins are released
 
   stepMode_t _stepMode;          // type of stepper movement 
-  int8_t _seqCur = 0;            // current element of step sequence table
+  volatile int8_t _stepCur = 0;  // current element of step sequence table
+  volatile const uint8_t* _stepTable;     // the currently active step table
 
   // Define options register and bit positions
-  volatile uint8_t _options;              // options register
+  volatile uint8_t _options;     // options register
   const uint8_t O_LOCKED = 0;    // leave motor locked when stopped stopped
 
   // Define status register and bit positions
@@ -627,12 +647,13 @@ private:
   inline void flagClr(volatile uint8_t &f, uint8_t bit) { f &= ~_BV(bit); }
 
   void calcStepTick(uint16_t spd);
-  bool runFSM(void);
-  void singleStep(void);
+#if !ENABLE_AUTORUN
+  void runStepISR(void);
+#endif
 
 #if ENABLE_AUTORUN
 private: 
-  static const uint16_t ISR_FREQUENCY = 4096;  ///< frequency for TIMER ISR
+  static const uint16_t ISR_FREQUENCY = 2048;        ///< frequency for TIMER ISR
 #if USE_TIMER == 1
   static const uint32_t TIMER_RESOLUTION = 65535;    ///< Timer1 is 16 bit
 #elif USE_TIMER == 2
@@ -656,6 +677,15 @@ public:
   static bool _bInitialised;          ///< ISR - Global vector initialization flag
   static volatile uint8_t _instCount; ///< ISR - Number of instances currently configured
   static MD_Stepper* _cbInstance[];   ///< ISR - Callback instance handle per pin slot
+
+ /**
+  * ISR - Step the motor
+  *
+  * NOT FOR END USER APPLICATIONS!
+  *
+  * Runs the motor steps and keeps counts when AUTORUN is enabled.
+  */
+  void runStepISR(void);
 
  /**
   * ISR - Set the timer frequency for the

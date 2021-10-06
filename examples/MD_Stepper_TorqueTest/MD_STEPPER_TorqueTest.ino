@@ -190,9 +190,7 @@ void setup(void)
 
 void loop(void) 
 {
-#if !ENABLE_AUTORUN
   S.run();
-#endif
 
   // handle the e-STOP first
   if (swEStop.read() == MD_UISwitch::KEY_PRESS)

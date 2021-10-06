@@ -13,12 +13,12 @@
 #include <MD_cmdProcessor.h>
 #include <MD_Stepper.h>
 
-const uint8_t INA1 = 4;
-const uint8_t INA2 = 5;
-const uint8_t INB1 = 6;
-const uint8_t INB2 = 7;
+const uint8_t INA1 = 2;
+const uint8_t INA2 = 3;
+const uint8_t INB1 = 4;
+const uint8_t INB2 = 5;
 
-const uint8_t PIN_BUSY_SIGNAL = 8;
+const uint8_t PIN_BUSY_SIGNAL = 255;
 
 MD_Stepper S(INA1, INA2, INB1, INB2);
 
@@ -201,8 +201,6 @@ void setup(void)
 
 void loop(void)
 {
-#if !ENABLE_AUTORUN
   S.run();
-#endif
   CP.run();
 }

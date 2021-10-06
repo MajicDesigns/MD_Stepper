@@ -34,9 +34,7 @@ void loop(void)
 
   S.setSpeed(speed);
   if (!S.isBusy()) S.start();
-#if !ENABLE_AUTORUN
   S.run();
-#endif
 }
 
 

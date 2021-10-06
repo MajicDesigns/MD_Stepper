@@ -26,7 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectlogo"><img alt="Logo" src="MajicDesigns_Logo.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
-   <div id="projectname">Stepper Motor<span id="projectnumber">&#160;1.0</span>
+   <div id="projectname">Stepper Motor<span id="projectnumber">&#160;1.1</span>
    </div>
    <div id="projectbrief">Stepper Motor Library</div>
   </td>
@@ -98,11 +98,11 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <p ><em>28BYJ-48 with ULN2003 driver</em> - Unipolar stepper with coil wire pairs BLU/YLW, ORN/PNK and common RED. I/O pin wiring INA1 to IND, INA2/INB, INB1/INC, INB2/INA. This motor can be modified be a bipolar motor - <a href="https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/">https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/</a> (verified works).</p>
 <h2>Important Notes</h2>
 <ul>
-<li>With ENABLE_AUTORUN disabled, this library will function on all hardware architectures but run() needs to be called each iteration through loop().</li>
-<li>By enabling ENABLE_AUTORUN, this library is limited to AVR architectures and run() will be invoked by a timer ISR, effectively driving the motor management as a background process.</li>
-<li>With ENABLE_AUTORUN enabled, this library uses AVR TIMER1 or TIMER2 to implement the interrupt driven clock. TIMER0 is used by the Arduino millis() clock, TIMER1 is commonly used by the Servo library and TIMER2 by the Tone library. Change USE_TIMER (defined at the top of the header file) to select which timer is enabled in the library code.</li>
+<li>By enabling ENABLE_AUTORUN, this library is limited to AVR architectures and motor stepping functions will be invoked by a timer ISR, effectively driving the motor stepping more copnsistently and as a background process.</li>
+<li>With ENABLE_AUTORUN enabled, this library uses AVR TIMER1 or TIMER2 to implement interrupt driven clock timing. TIMER0 is used by the Arduino millis() clock, TIMER1 is commonly used by the Servo library and TIMER2 by the Tone library. Change USE_TIMER (defined at the top of the header file) to select which timer is enabled in the library code.</li>
 <li>This library has been tested on Arduino Uno and Nano (ie, 328P processor).</li>
 <li>TIMERn is a global resource, so each concurrent class instance is driven from the same TIMERn interrupt. The constant MAX_INSTANCE is used to limit the global maximum for instances allowed to be processed by the same interrupt.</li>
+<li>ISR_FREQUENCY is used to set the TIMERn ISR frequency. This affects the max number of steps/s to drive the motor. Higher frequency means more interrupts and less time to do other things (including other interrupts).</li>
 </ul>
 <p >See Also</p><ul>
 <li><a class="el" href="page_revision_history.html">Revision History</a></li>
@@ -115,7 +115,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 27 2021 12:19:15 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
+    <li class="footer">Generated on Thu Oct 7 2021 08:37:33 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
   </ul>
 </div>
 </body>

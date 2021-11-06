@@ -93,12 +93,12 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <p >The motor control interface is 4 digital output pins specified in the class constructor. These pins are connected to external motor control hardware to provide the appropriate H-bridge connections for control bipolar motors) or current switching (unipolar motors).</p>
 <p >The pins are labeled in pairs A1, A2, B1, B2 for the 2 motor coils as shown in the figure below.</p>
 <p ><img src="Motor_Connections.png" alt="" class="inline" title="Motor Connection Diagram"/></p>
-<h3>Tested Motor Configurations</h3>
+<h3>Using 28BYJ-48 with ULN2003 driver</h3>
 <p ><img src="Motor_28BYJ-48.png" alt="" class="inline" title="28BYJ-48"/></p>
-<p ><em>28BYJ-48 with ULN2003 driver</em> - Unipolar stepper with coil wire pairs BLU/YLW, ORN/PNK and common RED. I/O pin wiring INA1 to IND, INA2/INB, INB1/INC, INB2/INA. This motor can be modified be a bipolar motor - <a href="https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/">https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/</a> (verified works).</p>
+<p >The stepper motor is a unipolar stepper with coil wire pairs BLU/YLW, ORN/PNK and common RED. For the software the I/O pin wiring is INA1 to IND, INA2/INB, INB1/INC, and INB2/INA. This motor can be modified be a bipolar motor - <a href="https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/">https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/</a> (verified works).</p>
 <h2>Important Notes</h2>
 <ul>
-<li>By enabling ENABLE_AUTORUN, this library is limited to AVR architectures and motor stepping functions will be invoked by a timer ISR, effectively driving the motor stepping more copnsistently and as a background process.</li>
+<li>By enabling ENABLE_AUTORUN, this library is limited to AVR architectures and motor stepping functions will be invoked by a timer ISR, effectively driving the motor stepping more consistently and as a background process.</li>
 <li>With ENABLE_AUTORUN enabled, this library uses AVR TIMER1 or TIMER2 to implement interrupt driven clock timing. TIMER0 is used by the Arduino millis() clock, TIMER1 is commonly used by the Servo library and TIMER2 by the Tone library. Change USE_TIMER (defined at the top of the header file) to select which timer is enabled in the library code.</li>
 <li>This library has been tested on Arduino Uno and Nano (ie, 328P processor).</li>
 <li>TIMERn is a global resource, so each concurrent class instance is driven from the same TIMERn interrupt. The constant MAX_INSTANCE is used to limit the global maximum for instances allowed to be processed by the same interrupt.</li>
@@ -115,7 +115,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Oct 7 2021 08:37:33 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
+    <li class="footer">Generated on Sun Nov 7 2021 08:42:09 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
   </ul>
 </div>
 </body>

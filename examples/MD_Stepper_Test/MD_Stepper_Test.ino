@@ -201,6 +201,16 @@ void setup(void)
 
 void loop(void)
 {
+#if 1
+  static uint32_t time = 0;
+
+  if (millis() - time >= 1000)
+  {
+    Serial.print("\nT> ");
+    Serial.print(millis());
+    time = millis();
+  }
+#endif
   S.run();
   CP.run();
 }

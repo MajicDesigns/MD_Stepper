@@ -202,7 +202,7 @@ inline void MD_Stepper::calcStepTick(uint16_t spd)
 {
   if (spd != 0)
     _stepTick = 1000000L / spd;
-  PRINT("\nus/pulse: ", _stepTick);
+  //PRINT("\nus/pulse: ", _stepTick);
 }
 
 void MD_Stepper::run(void)
@@ -218,28 +218,41 @@ void MD_Stepper::run(void)
         for (uint8_t i = 0; i < MAX_PINS; i++)
           digitalWrite(_pin[i].id, LOW);
 
-        PRINTS("\nLock released");
+        PRINTFSM("Lock off");
         flagClr(_status, S_LOCKED);
       }
     }
     break;
 
   case STP_INIT:                // initialize before the next run
-    PRINTS("\n->INIT");
-    if ((_speedSet == 0) ||                                  // no speed set doesn't do anything
-        (flagChk(_status, S_RUNMOVE) && _moveCountSet == 0)) // move run with no moves set, also don't do anything
+    PRINTFSM("INIT");
+    // Check move indicators are consistent
+    if ((flagChk(_status, S_RUNMOVE) && _moveCountSet == 0) ||
+      (!flagChk(_status, S_RUNMOVE) && _moveCountSet != 0))
     {
-      PRINT(" not starting: SpSet[", _speedSet);
-      PRINT("] Mv[", flagChk(_status, S_RUNMOVE));
-      PRINT("] MvSet[", _moveCountSet);
-      PRINTS("]");
-      if (_moveCountSet == 0) flagClr(_status, S_RUNMOVE);
-      _runState = STP_IDLE;
-      PRINTS("\n->to IDLE");
+      PRINT(" - reset MvFlag[", flagChk(_status, S_RUNMOVE));
+      PRINT("] MvCount[", _moveCountSet);
+      PRINTS("] -");
+      flagClr(_status, S_RUNMOVE);
+      _moveCountSet = 0;
     }
-    else
+
+    // only start moving if speed set is non zero
+    // MC 20211107 - better to keep something moving, so put in a very slow value
+    //               and let it run. At least it will be clear this has happened!
+    if (_speedSet == 0)
     {
-      PRINTS(" starting to RUN");
+      PRINT(" no start: SpSet[", _speedSet);
+      PRINTS("]");
+      _speedSet = 10;
+      // MC 20211107
+      //_runState = STP_IDLE;   
+      //PRINTFSM("INIT to IDLE");
+    }
+    // MC 20211107
+    //else
+    {
+      PRINTS(" to RUN");
       flagSet(_status, S_BUSY);
       flagClr(_status, S_LOCKED);
       _runState = STP_RUN;
@@ -251,14 +264,19 @@ void MD_Stepper::run(void)
 #if !ENABLE_AUTORUN
     runStepISR();
 #endif
+    if (_runState == STP_STOP)
+      PRINTFSM("RUN to STOP");
     break;
 
   case STP_STOP:                // stopping the motor
-    PRINTS("\n->STOP!!");
+    PRINTFSM("STOP!!");
+    flagSet(_status, S_LOCKED);
     flagClr(_status, S_BUSY);
     flagClr(_status, S_RUNMOVE);
-    flagSet(_status, S_LOCKED);
-    _runState = STP_IDLE;      // next stage is to wait until something start up again
+    _moveCountSet = 0;         // in case prematurely stopped
+
+    _runState = STP_IDLE;      // next stage is to wait until something starts up again
+    PRINTFSM("STOP to IDLE");
     _timeMark = millis();      // for lock release later if option enabled
     break;
   }
@@ -312,7 +330,7 @@ void MD_Stepper::runStepISR(void)
       _moveCountSet--;
       if (_moveCountSet == 0)
       {
-        PRINTS("\n-->MOVE END");
+        flagClr(_status, S_RUNMOVE);
         _runState = STP_STOP;
       }
     }

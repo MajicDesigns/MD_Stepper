@@ -25,18 +25,12 @@ var class_m_d___stepper =
     [ "moveToGo", "class_m_d___stepper.html#a50585bff212886ad7d975aa94ce5705b", null ],
     [ "resetPosition", "class_m_d___stepper.html#a65ec7faa864eb5e5574fcd33aa5641d6", null ],
     [ "run", "class_m_d___stepper.html#a5ad2079e815914898fbfae930547db9f", null ],
-    [ "runStepISR", "class_m_d___stepper.html#a0490aa03226a19e3e4d5499921b8829e", null ],
     [ "setBusyPin", "class_m_d___stepper.html#ae5471a08f0781cf79b24b64180c5d2fd", null ],
     [ "setDirection", "class_m_d___stepper.html#af6e789137d6ecc03772674d4fa4708ba", null ],
-    [ "setFrequency", "class_m_d___stepper.html#a4c76127aa3fd73d7afcb81180b5e5c15", null ],
     [ "setMotorLockTime", "class_m_d___stepper.html#aceb79a58d32287014a6c102679d444ec", null ],
     [ "setSpeed", "class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30", null ],
     [ "setStepMode", "class_m_d___stepper.html#a443a9ea53632fff0b9762896ef2c05fb", null ],
     [ "setVelocity", "class_m_d___stepper.html#ae3368176bbd9d588acbcdae1531cb2b4", null ],
     [ "start", "class_m_d___stepper.html#a4328bdf9c9e28eb34b89cf9082278b48", null ],
-    [ "stop", "class_m_d___stepper.html#a452edf1c05261d7f010775a0cd7ab174", null ],
-    [ "_bInitialised", "class_m_d___stepper.html#a853259850f99008b325cd27c9fb69cfe", null ],
-    [ "_cbInstance", "class_m_d___stepper.html#adf09655afc2bed6fdf88c1ac38c41fbb", null ],
-    [ "_instCount", "class_m_d___stepper.html#aa2315b41027bceb2ebebacf50e3f5e34", null ],
-    [ "MAX_INSTANCE", "class_m_d___stepper.html#a45be9c6d09c9e5ed8fb08c3aebc31676", null ]
+    [ "stop", "class_m_d___stepper.html#a452edf1c05261d7f010775a0cd7ab174", null ]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['use_5ftimer_0',['USE_TIMER',['../_m_d___stepper_8h.html#a63962584f36d92d5e840df214a57cf2a',1,'MD_Stepper.h']]]
+  ['_7emd_5fstepper_0',['~MD_Stepper',['../class_m_d___stepper.html#aa8f5f2cb2e241f8e2b1ff1e3cea97920',1,'MD_Stepper']]]
 ];

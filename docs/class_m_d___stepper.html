@@ -92,14 +92,6 @@ $(document).ready(function(){initNavTree('class_m_d___stepper.html',''); initRes
 <div class="contents">
 
 <p><code>#include &lt;MD_Stepper.h&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for MD_Stepper:</div>
-<div class="dyncontent">
-<div class="center"><img src="class_m_d___stepper__coll__graph.png" border="0" usemap="#a_m_d___stepper_coll__map" alt="Collaboration graph"/></div>
-<map name="a_m_d___stepper_coll__map" id="a_m_d___stepper_coll__map">
-<area shape="rect" title=" " alt="" coords="5,5,99,32"/>
-</map>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -172,28 +164,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aceb79a58d32287014a6c102679d444ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e7f103c0b7ce9ba66455c5daddda3d6"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a3e7f103c0b7ce9ba66455c5daddda3d6">getRawStatus</a> (void)</td></tr>
 <tr class="separator:a3e7f103c0b7ce9ba66455c5daddda3d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader">AUTORUN and ISR management related. NOT for Applications!</h2></td></tr>
-<tr class="memitem:a45be9c6d09c9e5ed8fb08c3aebc31676"><td class="memItemLeft" align="right" valign="top"><a id="a45be9c6d09c9e5ed8fb08c3aebc31676" name="a45be9c6d09c9e5ed8fb08c3aebc31676"></a>
-static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_INSTANCE</b> = 4</td></tr>
-<tr class="memdesc:a45be9c6d09c9e5ed8fb08c3aebc31676"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum concurrent instances. <br /></td></tr>
-<tr class="separator:a45be9c6d09c9e5ed8fb08c3aebc31676"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a853259850f99008b325cd27c9fb69cfe"><td class="memItemLeft" align="right" valign="top"><a id="a853259850f99008b325cd27c9fb69cfe" name="a853259850f99008b325cd27c9fb69cfe"></a>
-static bool&#160;</td><td class="memItemRight" valign="bottom"><b>_bInitialised</b></td></tr>
-<tr class="memdesc:a853259850f99008b325cd27c9fb69cfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">ISR - Global vector initialization flag. <br /></td></tr>
-<tr class="separator:a853259850f99008b325cd27c9fb69cfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa2315b41027bceb2ebebacf50e3f5e34"><td class="memItemLeft" align="right" valign="top"><a id="aa2315b41027bceb2ebebacf50e3f5e34" name="aa2315b41027bceb2ebebacf50e3f5e34"></a>
-static volatile uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>_instCount</b></td></tr>
-<tr class="memdesc:aa2315b41027bceb2ebebacf50e3f5e34"><td class="mdescLeft">&#160;</td><td class="mdescRight">ISR - Number of instances currently configured. <br /></td></tr>
-<tr class="separator:aa2315b41027bceb2ebebacf50e3f5e34"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf09655afc2bed6fdf88c1ac38c41fbb"><td class="memItemLeft" align="right" valign="top"><a id="adf09655afc2bed6fdf88c1ac38c41fbb" name="adf09655afc2bed6fdf88c1ac38c41fbb"></a>
-static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_cbInstance</b> []</td></tr>
-<tr class="memdesc:adf09655afc2bed6fdf88c1ac38c41fbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">ISR - Callback instance handle per pin slot. <br /></td></tr>
-<tr class="separator:adf09655afc2bed6fdf88c1ac38c41fbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0490aa03226a19e3e4d5499921b8829e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a0490aa03226a19e3e4d5499921b8829e">runStepISR</a> (void)</td></tr>
-<tr class="separator:a0490aa03226a19e3e4d5499921b8829e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c76127aa3fd73d7afcb81180b5e5c15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_m_d___stepper.html#a4c76127aa3fd73d7afcb81180b5e5c15">setFrequency</a> (uint32_t freq)</td></tr>
-<tr class="separator:a4c76127aa3fd73d7afcb81180b5e5c15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Core object for the MD_PWM library </p>
@@ -464,7 +434,7 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Gets the configured running speed.</p>
+<p >Gets the current speed setting.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="class_m_d___stepper.html#ae2688ac05d2d17bf75cdbb041b77dd30">setSpeed()</a>, setMaxSpeed()</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>the running speed in steps/sec </dd></dl>
 
@@ -723,27 +693,6 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 
 </div>
 </div>
-<a id="a0490aa03226a19e3e4d5499921b8829e" name="a0490aa03226a19e3e4d5499921b8829e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0490aa03226a19e3e4d5499921b8829e">&#9670;&nbsp;</a></span>runStepISR()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void MD_Stepper::runStepISR </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >ISR - Step the motor</p>
-<p >NOT FOR END USER APPLICATIONS!</p>
-<p >Runs the motor steps and keeps counts when AUTORUN is enabled. </p>
-
-</div>
-</div>
 <a id="ae5471a08f0781cf79b24b64180c5d2fd" name="ae5471a08f0781cf79b24b64180c5d2fd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae5471a08f0781cf79b24b64180c5d2fd">&#9670;&nbsp;</a></span>setBusyPin()</h2>
 
@@ -795,33 +744,6 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">fwd</td><td>sets the motor to 'forward' if true, 'reverse' if false </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a4c76127aa3fd73d7afcb81180b5e5c15" name="a4c76127aa3fd73d7afcb81180b5e5c15"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4c76127aa3fd73d7afcb81180b5e5c15">&#9670;&nbsp;</a></span>setFrequency()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void MD_Stepper::setFrequency </td>
-          <td>(</td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>freq</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >ISR - Set the timer frequency for the</p>
-<p >NOT FOR END USER APPLICATIONS!</p>
-<p >Manipulates the CPU registers to set the appropriate clock counters to achieve the desired output frequency.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">freq</td><td>the desired frequency. </td></tr>
   </table>
   </dd>
 </dl>
@@ -995,7 +917,7 @@ static <a class="el" href="class_m_d___stepper.html">MD_Stepper</a> *&#160;</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_m_d___stepper.html">MD_Stepper</a></li>
-    <li class="footer">Generated on Thu Oct 7 2021 08:37:33 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
+    <li class="footer">Generated on Sun Nov 7 2021 08:42:09 for Stepper Motor by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.2 </li>
   </ul>
 </div>
 </body>

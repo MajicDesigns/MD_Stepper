@@ -23,19 +23,20 @@ as shown in the figure below.
 
 ![Motor Connection Diagram] (Motor_Connections.png "Motor Connections")
 
-### Tested Motor Configurations
+### Using 28BYJ-48 with ULN2003 driver
 
 ![28BYJ-48] (Motor_28BYJ-48.png "28BYJ-48 Connections")
 
-_28BYJ-48 with ULN2003 driver_ - Unipolar stepper with coil wire pairs
-BLU/YLW, ORN/PNK and common RED. I/O pin wiring INA1 to IND, INA2/INB,
-INB1/INC, INB2/INA. This motor can be modified be a bipolar motor - 
+The stepper motor is a unipolar stepper with coil wire pairs BLU/YLW, 
+ORN/PNK and common RED. For the software the I/O pin wiring is 
+INA1 to IND, INA2/INB, INB1/INC, and INB2/INA. This motor can be 
+modified be a bipolar motor - 
 https://ardufocus.com/howto/28byj-48-bipolar-hw-mod/ (verified works).
 
 ## Important Notes
 - By enabling ENABLE_AUTORUN, this library is limited to AVR
 architectures and motor stepping functions will be invoked by a 
-timer ISR, effectively driving the motor stepping more copnsistently 
+timer ISR, effectively driving the motor stepping more consistently 
 and as a background process.
 
 - With ENABLE_AUTORUN enabled, this library uses AVR TIMER1 or TIMER2
@@ -81,6 +82,9 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \page pageRevisionHistory Revision History
+Nov 2021 ver 1.1.1
+- Fixed rare problem with move() and drive() modes confused
+
 Oct 2021 ver 1.1.0
 - Changed ISR handling for memory and code efficiency
 - Implemented direct I/O for speed
@@ -107,7 +111,7 @@ Sep 2021 ver 1.0.0
  */
 
 #ifndef ENABLE_AUTORUN
-#define ENABLE_AUTORUN 1    ///< enable/disable autorun mode using TIMER ISR
+#define ENABLE_AUTORUN 0    ///< enable/disable autorun mode using TIMER ISR
 #endif
 #if ENABLE_AUTORUN
 #define USE_TIMER 1         ///< Set to use hardware TIMER1 or TIMER2 (1 or 2)
@@ -118,11 +122,13 @@ Sep 2021 ver 1.0.0
 #endif
 
 #if STPDEBUG
+#define PRINTFSM(s)  do { Serial.print('\n'); Serial.print(_pin[0].id); Serial.print(F("=>")); Serial.print(F(s)); } while (false)
 #define PRINTS(s)    Serial.print(F(s))
 #define PRINT(s,v)   do { Serial.print(F(s)); Serial.print(v); } while (false)
 #define PRINTX(s,v)  do { Serial.print(F(s)); Serial.print(F("0x")); Serial.print(v, HEX); } while (false)
 #define PRINTB(s,v)  do { Serial.print(F(s)); Serial.print(F("0b")); Serial.print(v, BIN); } while (false)
 #else
+#define PRINTFSM(s)
 #define PRINTS(s)
 #define PRINT(s,v)
 #define PRINTX(s,v)
@@ -299,7 +305,7 @@ public:
   inline int32_t getPosition(void)  { return(_stepCount); }
 
  /**
-  * Gets the configured running speed.
+  * Gets the current speed setting.
   *
   * \sa setSpeed(), setMaxSpeed()
   *
@@ -618,6 +624,7 @@ private:
   uint8_t _pinBusy;              // hardware 'busy' pin; 255 if not used
   
   uint32_t _speedSet;            // set speed in steps/sec valid for current mode setting
+
   volatile int32_t  _stepCount;    // current steps and direction since last resetPosition()
   volatile uint32_t _moveCountSet; // move pulses target value and to-go counter
 
